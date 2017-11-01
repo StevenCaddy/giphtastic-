@@ -1,50 +1,81 @@
 $(document).ready(function(){
+	var places = ["Paris", "London", "Belgium", "Mount Everest", "Rome"];
 
 
+	function renderButtons(arrayUsed, classUsed, areaUsed){
+		$(areaUsed).empty();
 
-	$("button").on("click", function() {
-      // Grabbing and storing the data-animal property value from the button
-      var place = $(this).attr("data-place");
+		for (var i = 0; i < arrayUsed.length; i++){
+			var a = $("<button>");
+			a.addClass(classUsed);
+			a.attr("data-type", arrayUsed[i]);
+			a.text(arrayUsed[i]);
+			$(areaUsed).append(a);
+		}
 
-      // Constructing a queryURL using the animal name
-      var queryURL = "http://api.giphy.com/v1/gifs/search?q=" +
-        place + "&api_key=dc6zaTOxFJmzC&limit=10";
+	}
 
-      // Performing an AJAX request with the queryURL
-      $.ajax({
-          url: queryURL,
-          method: "GET"
-        })
-        // After data comes back from the request
-        .done(function(response) {
-          console.log(queryURL);
+	$(document).on("click", ".place-button", function() {
+    	$("#places").empty();
+    	$(".place-button").removeClass("active");
+    	$(this).addClass("active");
 
-          console.log(response);
-          // storing the data from the AJAX request in the results variable
-          var results = response.data;
+    	var type = $(this).attr("data-type");
+    	var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + type + "&api_key=dc6zaTOxFJmzC&limit=10";
 
-          // Looping through each result item
-          for (var i = 0; i < results.length; i++) {
+    	$.ajax({
+    		url: queryURL,
+    		method: "GET"
+    	}).done(function(response){
+    		var results = response.data;
 
-            // Creating and storing a div tag
-            var placeDiv = $("<div>");
+    		for (var i = 0; i < results.length; i++) {
+    			var placeDiv = $("<div class=\"place-item\">");
+    			var rating = results[i].rating;
+    			var p = $("<p>").text("Rating: " + rating);
+    			var animated = results[i].images.fixed_height.url;
+    			var still = results[i].images.fixed_height_still.url;
+    			var placeImage = $("<img>");
 
-            // Creating a paragraph tag with the result item's rating
-            var p = $("<p>").text("Rating: " + results[i].rating);
+    			placeImage.attr("src", still);
+    			placeImage.attr("data-still", still);
+    			placeImage.attr("data-animate", animated);
+    			placeImage.attr("data-state", "still");
+    			placeImage.addClass("place-image");
 
-            // Creating and storing an image tag
-            var placeImage = $("<img>");
-            // Setting the src attribute of the image to a property pulled off the result item
-            placeImage.attr("src", results[i].images.fixed_height.url);
+    			placeDiv.append(p);
+    			placeDiv.append(placeImage);
 
-            // Appending the paragraph and image tag to the placeDiv
-            placeDiv.append(p);
-            placeDiv.append(placeImage);
-
-            // Prependng the placeDiv to the HTML page in the "#gifs-appear-here" div
-            $("#gifs-appear-here").prepend(placeDiv);
-          }
-        });
+    			$("#places").append(placeDiv);	
+    		}
+    	});
     });
+
+  $(document).on("click", ".place-image", function() {
+
+    var state = $(this).attr("data-state");
+
+    if (state === "still") {
+      $(this).attr("src", $(this).attr("data-animate"));
+      $(this).attr("data-state", "animate");
+    }
+    else {
+      $(this).attr("src", $(this).attr("data-still"));
+      $(this).attr("data-state", "still");
+    }
+  });
+
+  $("#add-place").on("click", function(event) {
+    event.preventDefault();
+    var newPlace = $("input").eq(0).val();
+
+    if (newplace.length > 2) {
+      places.push(newPlace);
+    }
+
+    renderButtons(places, "place-button", "#place-buttons");
+
+  });
+
+  renderButtons(places, "place-button", "#place-buttons");
 });
- 
