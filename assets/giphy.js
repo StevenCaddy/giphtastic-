@@ -69,7 +69,7 @@ $(document).ready(function(){
     event.preventDefault();
     var newPlace = $("input").eq(0).val();
 
-    if (newplace.length > 2) {
+    if (newPlace.length > 2) {
       places.push(newPlace);
     }
 
